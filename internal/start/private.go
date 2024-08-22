@@ -137,8 +137,11 @@ func PrivateMode() {
 			conf.NativeBundlerExecutorTracer,
 		),
 	)
+
 	c.SetGetUserOpByHashFunc(client.GetUserOpByHashWithEthClient(eth))
 	c.SetGetStakeFunc(stake.GetStakeWithEthClient(eth))
+	c.SetQngWeb3(client.QngWeb3Request(conf.EthClientUrl))
+	c.SetQngCross(client.QngCrossMeerChange(eoa, eth, conf.CrossContract, chain))
 	c.UseLogger(logr)
 	c.UseModules(
 		rep.CheckStatus(),
@@ -205,6 +208,9 @@ func PrivateMode() {
 	}
 	r.POST("/", handlers...)
 	r.POST("/rpc", handlers...)
+	r.POST("/export", handlers...)
+	r.POST("/bundler", handlers...)
+	r.POST("/qng", handlers...)
 
 	if err := r.Run(fmt.Sprintf(":%d", conf.Port)); err != nil {
 		log.Fatal(err)

@@ -34,6 +34,8 @@ type Client struct {
 	getUserOpByHash      GetUserOpByHashFunc
 	getStakeFunc         stake.GetStakeFunc
 	opLookupLimit        uint64
+	qngWeb3              QngWeb3Func
+	qngCross             QngCrossFunc
 }
 
 // New initializes a new ERC-4337 client which can be extended with modules for validating UserOperations
@@ -111,6 +113,12 @@ func (i *Client) SetGetUserOpByHashFunc(fn GetUserOpByHashFunc) {
 // function is called in *Client.SendUserOperation to create a context.
 func (i *Client) SetGetStakeFunc(fn stake.GetStakeFunc) {
 	i.getStakeFunc = fn
+}
+func (i *Client) SetQngWeb3(fn QngWeb3Func) {
+	i.qngWeb3 = fn
+}
+func (i *Client) SetQngCross(fn QngCrossFunc) {
+	i.qngCross = fn
 }
 
 // SendUserOperation implements the method call for eth_sendUserOperation.

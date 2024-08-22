@@ -95,8 +95,8 @@ func handleRequest(api interface{}, c *gin.Context, data map[string]any) (id any
 		jsonrpcError(c, -32602, "Invalid params", "No or invalid 'params' in request", &id)
 		return id, nil, false
 	}
-
-	call := reflect.ValueOf(api).MethodByName(cases.Title(language.Und, cases.NoLower).String(method))
+	callMethod := cases.Title(language.Und, cases.NoLower).String(method)
+	call := reflect.ValueOf(api).MethodByName(callMethod)
 	if !call.IsValid() {
 		jsonrpcError(c, -32601, "Method not found", "Method not found", &id)
 		return id, nil, false
@@ -401,6 +401,13 @@ func handleRequest(api interface{}, c *gin.Context, data map[string]any) (id any
 			}
 			args[i] = reflect.ValueOf(val)
 
+		case reflect.Bool:
+			val, ok := arg.(bool)
+			if !ok {
+				val = false
+			}
+			args[i] = reflect.ValueOf(val)
+
 		default:
 			if !ok {
 				jsonrpcError(c, -32603, "Internal error", "Invalid method definition", &id)
@@ -456,7 +463,7 @@ func Controller(api interface{}) gin.HandlerFunc {
 
 		data := make(map[string]any)
 		err = json.Unmarshal(body, &data)
-		if err != nil {
+		if err != nil { // batch request
 			var batch []map[string]any
 			err = json.Unmarshal(body, &batch)
 			if err != nil {
@@ -478,7 +485,7 @@ func Controller(api interface{}) gin.HandlerFunc {
 				})
 			}
 			c.JSON(http.StatusOK, result)
-		} else if id, res, success := handleRequest(api, c, data); success {
+		} else if id, res, success := handleRequest(api, c, data); success { // single request
 			c.JSON(http.StatusOK, gin.H{
 				"jsonrpc": "2.0",
 				"id":      id,

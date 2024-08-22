@@ -49,8 +49,9 @@ type Values struct {
 	IsArbStackNetwork  bool
 
 	// Undocumented variables.
-	DebugMode bool
-	GinMode   string
+	DebugMode     bool
+	GinMode       string
+	CrossContract string
 }
 
 func envKeyValStringToMap(s string) map[string]string {
@@ -144,6 +145,7 @@ func GetValues() *Values {
 	_ = viper.BindEnv("erc4337_bundler_is_rip7212_supported")
 	_ = viper.BindEnv("erc4337_bundler_debug_mode")
 	_ = viper.BindEnv("erc4337_bundler_gin_mode")
+	_ = viper.BindEnv("qng_meerchange_cross_contract")
 
 	// Validate required variables
 	if variableNotSetOrIsNil("erc4337_bundler_eth_client_url") {
@@ -160,6 +162,9 @@ func GetValues() *Values {
 			panic(err)
 		}
 		viper.SetDefault("erc4337_bundler_beneficiary", s.Address.String())
+	}
+	if variableNotSetOrIsNil("qng_meerchange_cross_contract") {
+		panic("Fatal config error: qng_meerchange_cross_contract not set")
 	}
 
 	switch viper.GetString("mode") {
@@ -207,6 +212,7 @@ func GetValues() *Values {
 	isRIP7212Supported := viper.GetBool("erc4337_bundler_is_rip7212_supported")
 	debugMode := viper.GetBool("erc4337_bundler_debug_mode")
 	ginMode := viper.GetString("erc4337_bundler_gin_mode")
+	crossContract := viper.GetString("qng_meerchange_cross_contract")
 	return &Values{
 		PrivateKey:                   privateKey,
 		EthClientUrl:                 ethClientUrl,
@@ -234,5 +240,6 @@ func GetValues() *Values {
 		IsRIP7212Supported:           isRIP7212Supported,
 		DebugMode:                    debugMode,
 		GinMode:                      ginMode,
+		CrossContract:                crossContract,
 	}
 }
